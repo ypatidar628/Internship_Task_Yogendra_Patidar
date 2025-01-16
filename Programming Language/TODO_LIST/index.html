@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TODO LIST</title>
+    <!-- Add Tailwind css link -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      .logo {
+        text-shadow: 3px 3px 3px rgba(0, 0, 0, 0.634);
+      }
+    </style>
+  </head>
+
+  <body class="bg-[#faf16554]">
+    <div class="sm:flex justify-center">
+      <div class="p-2 font-serif text-3xl text-amber-300 -mr-2 logo">
+        <span class="text-5xl">T</span>odo
+      </div>
+      <div class="p-2 font-serif text-3xl text-slate-500 logo">
+        <span class="text-5xl">A</span> pp
+      </div>
+    </div>
+    <div class="sm:flex">
+      <div class="m-6">
+        <form onsubmit="addTask(event)">
+          <input
+            type="text"
+            id="input_text"
+            placeholder="Enter A Task"
+            class="border border-b-amber-300 p-1"
+          />
+          <!-- <input type="text" id="search" placeholder="search here" class="border border-b-amber-300 ml-4 p-1">  -->
+          <br />
+          <button
+            type="submit"
+            class="rounded-sm bg-slate-500 text-amber-300 p-1 mt-4"
+          >
+            Add Task
+          </button>
+        </form>
+      </div>
+      <div class="m-6">
+        <form onsubmit="searchData(event)">
+          <input
+            type="text"
+            id="search"
+            placeholder="search here"
+            class="border border-b-amber-300 ml- p-1"
+          />
+          <br />
+          <button
+            type="submit"
+            class="rounded-sm bg-slate-500 text-amber-300 p-1 mt-4"
+          >
+            Search Task
+          </button>
+        </form>
+      </div>
+    </div>
+    <div id="res" class="border rounded-md border-b-amber-300 m-6 p-2"></div>
+
+    <div id="sres"></div>
+    <script>
+      let arr = JSON.parse(localStorage.getItem("arr")) || [];
+      var result = document.getElementById("res");
+      window.onload = function () {
+        showData();
+      };
+
+      //Add Tasks
+      function addTask(event) {
+        var text = document.getElementById("input_text").value;
+        event.preventDefault();
+
+        if (!text) {
+          alert("Please enter task!");
+          return;
+        }
+        var isSame = arr.some(
+          (arr) => arr.text.toLowerCase() === text.toLowerCase()
+        );
+        if (isSame) {
+          alert("Tasks already exist in list!");
+          return;
+        }
+        var obj = { text: text, search: search };
+        arr.push(obj);
+
+        updateLocalStorage();
+        showData();
+        clearFields();
+      }
+
+      //Show Data IN UI
+      function showData() {
+        result.innerHTML = "";
+        arr.map((data, index) => {
+          const taskContainer = document.createElement("li");
+          taskContainer.className = "flex justify-between items-center mb-2";
+
+          const taskText = document.createElement("span");
+          taskText.textContent = data.text;
+          taskContainer.appendChild(taskText);
+
+          //Edit Button
+          const editButton = document.createElement("button");
+          editButton.textContent = "Edit";
+          editButton.className =
+            "rounded-sm bg-amber-300 text-slate-500 p-1 ml-4 mr-4 ";
+          editButton.style.float = "right";
+
+          editButton.onclick = () => editTask(index);
+          result.appendChild(editButton);
+
+          //Delete Button
+          var delButton = document.createElement("button");
+          delButton.textContent = "Delete";
+          delButton.className = "rounded-sm bg-slate-500 text-amber-300 p-1";
+          delButton.style.float = "right";
+
+          delButton.onclick = () => delData(index);
+
+          taskContainer.appendChild(delButton);
+
+          result.appendChild(taskContainer);
+        });
+      }
+
+      //Edit Tasks
+      function editTask(index) {
+        const newText = prompt("Edit your task:", arr[index].text);
+        if (newText !== null && newText.trim() !== "") {
+          arr[index].text = newText.trim();
+          updateLocalStorage();
+          showData();
+        }
+      }
+
+      //Delete Data from UI And To local storage
+      function delData(index) {
+        if (confirm("Are you sure you want to delete this task?")) {
+          arr.splice(index, 1);
+          updateLocalStorage();
+          showData();
+        }
+      }
+
+      //Clear Fields.
+      function clearFields() {
+        text = document.getElementById("input_text").value = "";
+        search = document.getElementById("search").value = "";
+      }
+
+      //Search Data form List.
+      function searchData(event) {
+        var search = document
+          .getElementById("search")
+          .value.trim()
+          .toLowerCase();
+        var sres = document.getElementById("sres");
+        event.preventDefault();
+
+        if (!search) {
+          alert("Please enter task for search!");
+        }
+        var res = arr.filter((arr) => arr.text.toLowerCase() === search);
+
+        var findData = res.map((data) => {
+          var resu = data.text;
+          return resu;
+        });
+        console.log(findData);
+
+        if (findData.length > 0) {
+          var resp = `<p class="text-green-500 m-6">Found ${findData.length} :</p>
+                 <ul class="list-disc m-6">
+                        ${findData}
+                    </ul>`;
+        } else {
+          resp = `<p class="text-red-500 m-6">No data found  "${search}".</p>`;
+        }
+        sres.innerHTML = resp;
+
+        clearFields();
+      }
+
+      //Update Data Into Local Sorage
+      function updateLocalStorage() {
+        localStorage.setItem("arr", JSON.stringify(arr));
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+[
+    {
+      "question": "How many seconds make one hour?",
+      "options": ["2600", "3600", "3200", "2800"],
+      "answer": 1
+    },
+    {
+      "question": "Which planet is known as the Red Planet?",
+      "options": ["Earth", "Mars", "Jupiter", "Saturn"],
+      "answer": 1
+    },
+    {
+      "question": "How many consonants are there in the English alphabet?",
+      "options": ["5", "19", "23", "21"],
+      "answer": 3
+    },
+    {
+      "question": "What is the square root of 64?",
+      "options": ["6", "7", "8", "9"],
+      "answer": 2
+    }, {
+      "question": "What is the capital of France?",
+      "options": ["Paris", "Berlin", "Madrid", "Rome"],
+      "answer": 0
+    }
+  ]
+  

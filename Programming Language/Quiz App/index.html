@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Web Application</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Link Style CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+    <!-- Main container -->
+    <div class="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg mt-56 ">
+        <!-- Start Quiz -->
+        <div class="text-center" id="start-quiz">
+            <button class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600" id="startButton"
+                onclick="StartQuiz()">Start Quiz</button>
+        </div>
+        <!-- Instructions -->
+        <div class="hidden" id="Insruction">
+            <h3 class="text-lg font-semibold mb-4">Some Rules of this Quiz</h3>
+            <hr class="mb-4">
+            <ol class="list-decimal list-inside space-y-2">
+                <li>You will have only 15 seconds per each question.</li>
+                <li>Once you select your answer, it can't be undone.</li>
+                <li>You can't select any option once time goes off.</li>
+                <li>You can't exit from the Quiz while you're playing.</li>
+                <li>You'll get points on the basis of your correct answers.</li>
+            </ol>
+            <div class="mt-6 space-x-4">
+                <button class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600" onclick="resetQuiz()">Reset
+                    Quiz</button>
+                <button class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+                    onclick="startQuizWithInstruction()">Start Quiz</button>
+            </div>
+        </div>
+        <!-- Quiz -->
+        <div id="quiz" class="hidden">
+            <div class="mb-4">
+                <h3 class="text-lg font-medium">Time left for this question</h3>
+                <span class="text-xl font-bold text-red-500" id="counting">15</span>
+            </div>
+            <div class="h-2 bg-gray-300 rounded mb-4">
+                <div class="bg-blue-500 h-2 rounded" id="questionProgressBar" style="width: 100%;"></div>
+            </div>
+            <hr class="mb-4">
+            <div class="text-lg font-medium mb-4" id="question">Loading...</div>
+            <ul class="space-y-2" id="options"></ul>
+            <button class="bg-blue-500 text-white py-2 px-4 mt-3 rounded hover:bg-blue-600 disabled:opacity-50"
+                id="nextButton" onclick="nextQuestion()" disabled>Next Question</button>
+        </div>
+        <!-- Result -->
+        <div id="result" class="hidden text-center">
+            <h2 class="text-2xl font-bold mb-4">Quiz Completed</h2>
+            <p class="text-lg">Your score: <span id="score" class="font-semibold"></span></p>
+            <button class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 mt-4" id="resetButton"
+                onclick="restartQuestion()">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('Insruction').classList.add('hidden');
+        var score = 0;
+        var questions = [];
+        var currentQuestionIndex = 0;
+        var questionContainer = document.getElementById('question');
+        var options = document.getElementById('options');
+        document.getElementById('quiz').classList.add('hidden');
+
+        // Start Quiz
+        var StartQuiz = () => {
+            document.getElementById('start-quiz').classList.add('hidden');
+            document.getElementById('Insruction').classList.remove('hidden');
+        };
+
+        // Start Quiz with Instructions
+        var startQuizWithInstruction = () => {
+            document.getElementById('Insruction').classList.add('hidden');
+            loadQuestions();
+            startCountdown();
+        };
+
+        // Load Questions from JSON
+        var loadQuestions = async () => {
+            document.getElementById('quiz').classList.remove('hidden');
+            try {
+                var response = await fetch('questions.json');
+                questions = await response.json();
+                if (questions) {
+                    showQuestion();
+                }
+            } catch (error) {
+                alert('Failed to load questions. Please try again.');
+            }
+        };
+
+        var timeLeft = 15;
+        var timer;
+
+        // Start Countdown Timer
+        var startCountdown = () => {
+            var progressBar = document.getElementById("questionProgressBar");
+            progressBar.style.width = "100%";
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById("counting").textContent = timeLeft;
+                const percentage = (timeLeft / 15) * 100;
+                progressBar.style.width = percentage + "%";
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    nextQuestion();
+                }
+            }, 1000);
+        };
+
+        // Display Question
+        var showQuestion = () => {
+            if (questions.length > currentQuestionIndex) {
+                var question = questions[currentQuestionIndex];
+                questionContainer.textContent = question.question;
+                options.innerHTML = '';
+                question.options.forEach((option, index) => {
+                    var li = document.createElement('li');
+                    li.innerHTML = `<input type="radio" name="option" id="option${index}" value="${index}"> 
+                                    <label for="option${index}" class="ml-2">${option}</label>`;
+                    options.appendChild(li);
+                });
+                document.getElementById('nextButton').disabled = true;
+
+                options.querySelectorAll('input[type="radio"]').forEach((radio) => {
+                    radio.addEventListener('change', () => {
+                        document.getElementById('nextButton').disabled = false;
+                    });
+                });
+            } else {
+                showResult();
+            }
+            timeLeft = 15;
+        };
+
+        // Display Result
+        var showResult = () => {
+            document.getElementById('quiz').classList.add('hidden');
+            document.getElementById('result').classList.remove('hidden');
+            document.getElementById('score').textContent = `${score} Out Of ${questions.length}`;
+        };
+
+        // Next Question
+        var nextQuestion = () => {
+            const selectedOption = document.querySelector('input[type="radio"]:checked');
+            if (selectedOption) {
+                if (selectedOption.value == questions[currentQuestionIndex].answer) {
+                    score++;
+                }
+            }
+            currentQuestionIndex++;
+            showQuestion();
+            clearInterval(timer);
+            startCountdown();
+        };
+
+        // Restart Quiz
+        function restartQuestion() {
+            clearInterval(timer);
+            window.location.reload();
+        }
+
+        // Reset Quiz
+        function resetQuiz() {
+            window.location.reload();
+        }
+    </script>
+</body>
+
+</html>

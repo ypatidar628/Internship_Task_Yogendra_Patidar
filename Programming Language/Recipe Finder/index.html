@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="max-w-4xl mx-auto p-8">
+        <h1 class="text-3xl font-bold font-mono text-center text-gray-800 mb-8">Recipe Finder</h1>
+
+        <!-- Search Section -->
+        <div class="flex justify-between mb-4">
+            <input id="foodSearch" type="text" placeholder="Search dish names..." class="p-3 w-full border rounded-lg" />
+            <button id="searchBtn" class="bg-blue-500 text-white p-3 rounded-lg ml-2">Search</button>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="flex justify-end mb-6">
+            <select id="filterType" class="p-2 rounded-lg border">
+                <option value="">All Recipes</option>
+                <option value="Breakfast">Breakfast</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Dinner">Dinner</option>
+            </select>
+        </div>
+
+        <!-- Recipe Results -->
+        <div id="recipeResults" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+    </div>
+
+    <script>
+        // Vegetarian recipe data with images
+        const recipes = [
+            { name: "Pancakes", ingredients: ["flour", "eggs", "milk"], type: "Breakfast", img: "https://upload.wikimedia.org/wikipedia/commons/4/40/Foodiesfeed.com_pouring-honey-on-pancakes-with-walnuts.jpg" },
+            { name: "Vegetable Salad", ingredients: ["lettuce", "tomato", "cucumber", "olive oil"], type: "Lunch", img: "https://southerndiscourse.com/wp-content/uploads/2021/09/Creamy-dressing-green-salad.jpg" },
+            { name: "Spaghetti with Tomato Sauce", ingredients: ["pasta", "tomato sauce", "garlic"], type: "Dinner", img: "https://recipecontent.fooby.ch/24259_3-2_1440-960.jpg" },
+            { name: "Omelette", ingredients: ["eggs", "cheese", "spinach"], type: "Breakfast", img: "https://pickyeaterblog.com/wp-content/uploads/2023/11/low-calorie-egg-white-omelette.jpg" },
+            { name: "Veggie Tacos", ingredients: ["taco shell", "cheese", "salsa", "avocado"], type: "Lunch", img: "https://www.yummymummykitchen.com/wp-content/uploads/2018/03/2c8ea-grilled-veggie-tacos.jpg" },
+            { name: "Grilled Vegetables", ingredients: ["zucchini", "bell pepper", "eggplant"], type: "Dinner", img: "https://www.budgetbytes.com/wp-content/uploads/2024/07/Grilled-Vegetables-Overhead.jpg" }
+        ];
+
+        // Function to render recipes with images
+        const renderRecipes = (filteredRecipes) => {
+            document.getElementById('recipeResults').innerHTML = filteredRecipes.length
+                ? filteredRecipes.map(recipe => `
+                    <div class="bg-white p-4 rounded-lg shadow-lg">
+                        <img src="${recipe.img}" alt="${recipe.name}" class="w-full h-40 object-cover mb-4 rounded-lg" />
+                        <h3 class="text-xl font-semibold mb-2">${recipe.name}</h3>
+                        <p class="text-gray-700 mb-4">Ingredients: ${recipe.ingredients.join(', ')}</p>
+                        <span class="text-sm text-gray-500">Type: ${recipe.type}</span>
+                    </div>
+                `).join('')
+                : '<p class="text-center text-gray-500">No recipes found.</p>';
+        };
+
+        // Function to filter recipes based on search and selected type
+        const filterRecipes = () => {
+            const searchQuery = document.getElementById('foodSearch').value.toLowerCase();
+            const selectedType = document.getElementById('filterType').value;
+
+            // Filter recipes by name and type
+            const filteredRecipes = recipes.filter(recipe =>
+                recipe.name.toLowerCase().includes(searchQuery) &&  // Search by dish name
+                (selectedType ? recipe.type === selectedType : true) // Filter by recipe type
+            );
+
+            renderRecipes(filteredRecipes);
+        };
+
+        // Event Listeners
+        document.getElementById('searchBtn').addEventListener('click', filterRecipes);
+        document.getElementById('foodSearch').addEventListener('keydown', filterRecipes());
+        document.getElementById('filterType').addEventListener('change', filterRecipes);
+
+        filterRecipes(); 
+    </script>
+
+</body>
+</html>
